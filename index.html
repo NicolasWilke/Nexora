@@ -1,0 +1,1399 @@
+<title>Nexora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --bg-elevated:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-2:#F7F4FC;
+    --ink:#2B2640;
+    --ink-soft:#6B6480;
+    --ink-faint:#9C96AE;
+    --border:#ECE7F5;
+    --border-strong:#DAD2EC;
+    --accent:#AABFFF;
+    --accent-strong:#4256CC;
+    --accent-ink:#2B2640;
+    --accent-2:#B7ECC3;
+    --accent-2-strong:#8FDDA3;
+    --accent-2-ink:#2B2640;
+    --accent-3:#D6CCF7;
+    --accent-3-strong:#7A6BD9;
+    --accent-3-ink:#2B2640;
+    --success:#2FA972;
+    --warning:#C0922B;
+    --shadow-sm: 0 1px 2px rgba(43,38,64,.07);
+    --shadow-md: 0 6px 20px rgba(43,38,64,.09);
+    --shadow-lg: 0 18px 40px rgba(43,38,64,.16);
+    --radius-s: 10px;
+    --radius-m: 16px;
+    --radius-l: 24px;
+    --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    padding-inline:0;
+  }
+  h1,h2,h3,h4{ font-family:var(--font-display); font-weight:700; margin:0; text-wrap:balance; letter-spacing:-.01em; }
+  p{ margin:0; }
+  button{ font-family:inherit; }
+  a{ color:inherit; }
+  img{ max-width:100%; display:block; }
+  .mono{ font-family:var(--font-mono); }
+  ::selection{ background:var(--accent); color:var(--accent-ink); }
+  :focus-visible{ outline:2.5px solid var(--accent-2); outline-offset:2px; border-radius:6px; }
+
+  /* ---------- App shell ---------- */
+  .app{
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .topbar{
+    position:sticky; top:env(safe-area-inset-top,0px); z-index:40;
+    display:flex; align-items:center; gap:18px;
+    padding:10px 20px;
+    background:color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .brand{ display:flex; align-items:center; gap:10px; flex:0 0 auto; text-decoration:none; }
+  .brand-word{ font-family:var(--font-display); font-weight:800; font-size:1.28rem; letter-spacing:-.01em; color:var(--ink); }
+  .logo-mark{ flex:0 0 auto; }
+
+  .searchbox{
+    flex:1 1 260px; max-width:420px;
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:999px; padding:8px 14px;
+    color:var(--ink-soft);
+  }
+  .searchbox input{
+    border:0; background:transparent; outline:0; color:var(--ink);
+    font-size:.9rem; width:100%; font-family:var(--font-body);
+  }
+  .searchbox input::placeholder{ color:var(--ink-faint); }
+  .searchbox svg{ flex:0 0 auto; opacity:.7; }
+
+  .topnav{ display:flex; align-items:center; justify-content:center; gap:4px; flex:1; min-width:0; }
+  .topnav button{
+    background:transparent; border:0; color:var(--ink-soft);
+    padding:9px 16px; cursor:pointer; font-family:var(--font-mono); font-size:.74rem; font-weight:600;
+    letter-spacing:.07em; text-transform:uppercase; border-radius:999px; position:relative;
+  }
+  .topnav button:hover{ color:var(--ink); background:var(--surface-2); }
+  .topnav button[aria-current="true"]{ color:var(--accent-strong); background:color-mix(in srgb, var(--accent) 16%, transparent); }
+
+  .nav-toggle{ display:none; width:38px; height:38px; border-radius:50%; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft); flex:0 0 auto; }
+  .nav-toggle:hover{ background:var(--surface-2); color:var(--ink); }
+
+  .topbar-right{ position:relative; display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%; border:1px solid var(--border);
+    background:var(--surface); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--ink-soft);
+  }
+  .icon-btn:hover{ background:var(--surface-2); color:var(--ink); }
+  .my-avatar{
+    width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--accent-2); color:var(--accent-2-ink); font-weight:800; font-size:.85rem;
+    font-family:var(--font-mono); cursor:pointer; border:0;
+  }
+  .my-avatar[hidden], #authToggleBtn[hidden]{ display:none; }
+
+  .auth-dropdown{
+    position:absolute; top:calc(100% + 10px); right:0; z-index:60;
+    width:380px; max-width:calc(100vw - 32px);
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m);
+    box-shadow:var(--shadow-lg); padding:18px;
+  }
+  .auth-dropdown[hidden]{ display:none; }
+
+  @media (max-width:760px){
+    .topbar{ flex-wrap:wrap; gap:10px; padding:10px 14px; }
+    .nav-toggle{ display:flex; }
+    .searchbox{ order:4; flex:1 1 100%; max-width:none; }
+    .topbar-right{ margin-left:auto; }
+    .topnav{
+      display:none; flex-direction:column; gap:2px;
+      position:absolute; left:14px; right:14px; top:calc(100% + 6px); z-index:55;
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m);
+      box-shadow:var(--shadow-lg); padding:8px;
+    }
+    .topnav[data-open="true"]{ display:flex; }
+    .topnav button{ display:flex; align-items:center; width:100%; text-align:left; padding:12px 14px; font-size:.78rem; }
+  }
+  @media (max-width:560px){
+    .brand-word{ display:none; }
+    .topbar{ gap:8px; }
+    #authToggleBtn{ padding:7px 10px; font-size:.72rem; }
+  }
+
+  /* ---------- Map hero ---------- */
+  .intro{
+    position:relative; overflow:hidden;
+    background:linear-gradient(120deg, var(--ink) 0%, #17223F 60%, var(--ink) 100%);
+    color:#EFEBFF;
+    padding:30px 20px 40px;
+  }
+  .intro[hidden]{ display:none; }
+  .intro canvas{ position:absolute; inset:0; width:100%; height:100%; opacity:.4; }
+  .intro-inner{ position:relative; max-width:720px; margin:0 auto; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .intro-eyebrow{
+    font-family:var(--font-mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+    color:#AFC6FF; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);
+    padding:5px 12px; border-radius:999px;
+  }
+  .intro h1{ font-size:clamp(1.5rem, 3.4vw, 2.15rem); color:#fff; }
+  .intro h1 em{ font-style:italic; color:var(--accent-2); }
+  .intro p{ color:#B9C4E6; max-width:52ch; font-size:.98rem; line-height:1.5; }
+
+  /* the network map itself */
+  .map-stage{
+    position:relative; z-index:1; display:flex; gap:36px; flex-wrap:wrap;
+    align-items:center; justify-content:center; max-width:1180px; margin:26px auto 0;
+  }
+  #graphSvg{ width:100%; max-width:660px; aspect-ratio:1/1; flex:2 1 460px; overflow:visible; }
+  .edge{ stroke:rgba(200,210,255,.28); stroke-width:1; transition:opacity .15s ease; }
+  .node{ cursor:pointer; }
+  .node circle{ stroke:#171F3A; stroke-width:2; transition:r .15s ease, opacity .15s ease; }
+  .node:hover circle, .node:focus-visible circle{ r:15; }
+  .node:focus-visible{ outline:0; }
+  .node.dim, .edge.dim{ opacity:.1; }
+  .cluster-label{ font-family:var(--font-mono); font-size:9px; fill:rgba(220,228,255,.6); letter-spacing:.05em; text-transform:uppercase; pointer-events:none; }
+
+  .map-legend{ position:relative; z-index:1; flex:0 0 216px; display:flex; flex-direction:column; gap:20px; text-align:left; }
+  .legend-title{ font-family:var(--font-mono); font-size:.66rem; text-transform:uppercase; letter-spacing:.1em; color:#8CA0E8; margin-bottom:9px; }
+  .legend-row{ display:flex; align-items:center; gap:9px; font-size:.8rem; color:#DCE2FF; padding:3px 0; }
+  .legend-dot{ width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+  .legend-group{ display:flex; flex-wrap:wrap; gap:6px; }
+  .legend-group .chip{
+    background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.16); color:#EFEBFF;
+    font-size:.72rem; padding:5px 11px;
+  }
+  .legend-group .chip:hover{ border-color:rgba(255,255,255,.32); }
+  .legend-group .chip[aria-pressed="true"]{ background:var(--accent-2); color:var(--accent-2-ink); border-color:var(--accent-2); }
+
+  .map-foot{ position:relative; z-index:1; text-align:center; margin-top:26px; }
+  .map-foot a{
+    color:#EFEBFF; font-size:.86rem; font-weight:700; text-decoration:none;
+    border-bottom:1px solid rgba(255,255,255,.4); padding-bottom:2px; cursor:pointer;
+  }
+  .map-foot a:hover{ border-color:#fff; }
+
+  @media (max-width:620px){
+    .map-stage{ margin-top:22px; gap:20px; }
+    .map-legend{ flex:1 1 100%; flex-direction:row; flex-wrap:wrap; gap:22px; justify-content:center; text-align:left; }
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; border-radius:999px; border:1px solid transparent;
+    padding:10px 20px; font-weight:700; font-size:.86rem; cursor:pointer; white-space:nowrap;
+  }
+  .btn-accent{ background:var(--accent-2); color:var(--accent-2-ink); }
+  .btn-accent:hover{ background:var(--accent-2-strong); }
+  .btn-ghost{ background:rgba(255,255,255,.07); color:#fff; border-color:rgba(255,255,255,.22); }
+  .btn-ghost:hover{ background:rgba(255,255,255,.14); }
+  .btn-outline{ background:transparent; color:var(--ink); border-color:var(--border-strong); }
+  .btn-outline:hover{ background:var(--surface-2); }
+  .btn-sm{ padding:7px 14px; font-size:.78rem; }
+  .btn-block{ width:100%; justify-content:center; }
+
+  /* ---------- Layout grid ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns: 250px minmax(0,1fr) 280px;
+    gap:20px;
+    max-width:1240px; width:100%; margin:0 auto;
+    padding:20px;
+    align-items:start;
+  }
+  .layout[hidden]{ display:none; }
+  .rail{ position:sticky; top:calc(64px + env(safe-area-inset-top,0px)); display:flex; flex-direction:column; gap:16px; }
+
+  @media (max-width: 1060px){ .layout{ grid-template-columns: 220px minmax(0,1fr); } .rail-right{ display:none; } }
+  @media (max-width: 760px){ .layout{ grid-template-columns: 1fr; padding:14px; gap:16px; } .rail-left{ display:none; } }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-m);
+    box-shadow:var(--shadow-sm);
+  }
+  .card-pad{ padding:18px; }
+
+  /* profile mini card */
+  .profile-mini .cover{ height:52px; border-radius:var(--radius-m) var(--radius-m) 0 0; background:linear-gradient(120deg, var(--accent-3), var(--accent)); }
+  .profile-mini .body{ padding:0 16px 16px; margin-top:-24px; display:flex; flex-direction:column; gap:10px; }
+  .avatar-lg{
+    width:56px; height:56px; border-radius:14px; border:3px solid var(--surface);
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-mono);
+    font-weight:800; font-size:1.05rem; color:var(--accent-2-ink); background:var(--accent-2);
+  }
+  .profile-mini .name{ font-family:var(--font-display); font-weight:700; font-size:1.02rem; }
+  .profile-mini .role{ color:var(--ink-soft); font-size:.8rem; }
+  .mini-stats{ display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:10px; }
+  .mini-stat b{ display:block; font-family:var(--font-mono); font-size:.95rem; }
+  .mini-stat span{ display:block; font-size:.68rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; }
+
+  .nav-list{ display:flex; flex-direction:column; }
+  .nav-list a{ display:flex; align-items:center; gap:10px; padding:9px 8px; border-radius:var(--radius-s); font-size:.85rem; color:var(--ink-soft); text-decoration:none; cursor:pointer; }
+  .nav-list a:hover{ background:var(--surface-2); color:var(--ink); }
+  .nav-list a svg{ width:17px; height:17px; opacity:.75; flex:0 0 auto; }
+
+  .rail-title{ font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); font-weight:800; margin-bottom:10px; }
+
+  /* gauge */
+  .gauge{ position:relative; display:flex; align-items:center; justify-content:center; border-radius:50%; flex:0 0 auto; }
+  .gauge .hole{ position:absolute; border-radius:50%; background:var(--surface); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .gauge .hole b{ font-family:var(--font-mono); line-height:1; }
+  .gauge .hole span{ color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; }
+
+  /* chips / tags */
+  .chip{
+    display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:var(--surface-2);
+    color:var(--ink-soft); padding:6px 12px; border-radius:999px; font-size:.76rem; font-weight:700; cursor:pointer;
+    white-space:nowrap;
+  }
+  .chip:hover{ border-color:var(--border-strong); }
+  .chip[aria-pressed="true"]{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .tag{ font-size:.72rem; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--surface-2); color:var(--ink-soft); }
+  .badge-verified{ display:inline-flex; align-items:center; gap:3px; color:var(--accent-strong); font-size:.72rem; font-weight:800; }
+  .badge-verified svg{ width:13px; height:13px; }
+
+  /* view container */
+  .view{ display:flex; flex-direction:column; gap:16px; }
+  .view[hidden]{ display:none; }
+  .view-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .view-head h2{ font-size:1.2rem; }
+  .view-head p{ color:var(--ink-soft); font-size:.86rem; }
+  .filters{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* composer */
+  .composer textarea{
+    width:100%; border:0; resize:vertical; min-height:44px; background:transparent; color:var(--ink);
+    font-family:var(--font-body); font-size:.92rem; outline:0;
+  }
+  .composer textarea::placeholder{ color:var(--ink-faint); }
+  .composer-row{ display:flex; align-items:flex-start; gap:12px; }
+  .composer-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-top:1px solid var(--border); padding-top:10px; }
+
+  /* post card */
+  .post-head{ display:flex; align-items:center; gap:10px; }
+  .post-name{ font-weight:800; font-size:.92rem; }
+  .post-meta{ color:var(--ink-faint); font-size:.76rem; }
+  .post-text{ font-size:.92rem; line-height:1.55; color:var(--ink); margin-top:10px; }
+  .post-tags{ display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+  .post-actions{ display:flex; gap:18px; margin-top:12px; border-top:1px solid var(--border); padding-top:10px; }
+  .post-actions button{ background:none; border:0; color:var(--ink-faint); display:flex; align-items:center; gap:6px; font-size:.78rem; font-weight:700; cursor:pointer; }
+  .post-actions button:hover{ color:var(--accent-strong); }
+  .post-actions svg{ width:16px; height:16px; }
+  .post-rfq{ border-color:var(--accent-3); }
+  .post-rfq .post-flag{ display:inline-flex; align-items:center; gap:6px; color:var(--accent-3-strong); font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; }
+
+  /* directory grid */
+  .grid-companies{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:14px; }
+  .company-card{ cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; text-align:left; width:100%; }
+  .company-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); }
+  .company-card .top{ display:flex; gap:10px; align-items:flex-start; }
+  .company-card .cat{ color:var(--ink-soft); font-size:.78rem; }
+  .company-card .loc{ color:var(--ink-faint); font-size:.76rem; display:flex; align-items:center; gap:4px; margin-top:2px; }
+  .company-card .loc svg{ width:12px; height:12px; }
+  .company-card .certs{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .company-card .footline{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; border-top:1px solid var(--border); padding-top:10px; }
+
+  /* rfq cards */
+  .rfq-card .top{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+  .rfq-card h3{ font-size:1rem; }
+  .rfq-card .buyer{ color:var(--ink-soft); font-size:.82rem; margin-top:2px; }
+  .rfq-meta{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; margin-top:14px; }
+  .rfq-meta div span{ display:block; color:var(--ink-faint); font-size:.68rem; text-transform:uppercase; letter-spacing:.04em; }
+  .rfq-meta div b{ font-family:var(--font-mono); font-size:.88rem; }
+  .rfq-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid var(--border); padding-top:12px; }
+  .match-pill{ display:inline-flex; align-items:center; gap:5px; font-size:.72rem; font-weight:800; padding:4px 10px; border-radius:999px; background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent-strong); }
+
+  /* publish rfq form */
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:560px){ .form-grid{ grid-template-columns:1fr; } }
+  .field label{ display:block; font-size:.74rem; font-weight:800; color:var(--ink-soft); margin-bottom:5px; text-transform:uppercase; letter-spacing:.03em; }
+  .field input, .field select{
+    width:100%; border:1px solid var(--border); background:var(--surface-2); border-radius:var(--radius-s);
+    padding:9px 11px; font-size:.86rem; color:var(--ink); font-family:var(--font-body); outline:0;
+  }
+  .field input:focus, .field select:focus{ border-color:var(--accent); }
+
+  /* company detail */
+  .detail-cover{ height:110px; border-radius:var(--radius-l) var(--radius-l) 0 0; background:linear-gradient(120deg, var(--accent-3), var(--accent) 75%, var(--accent-2) 100%); position:relative; }
+  .detail-head{ position:relative; display:flex; gap:16px; align-items:flex-end; padding:0 20px 18px 120px; flex-wrap:wrap; }
+  .avatar-xl{
+    position:absolute; left:20px; top:-34px;
+    width:84px; height:84px; border-radius:20px; border:4px solid var(--surface);
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-mono);
+    font-weight:800; font-size:1.6rem; color:var(--ink); flex:0 0 auto;
+  }
+  .detail-info{ flex:1 1 220px; padding-top:16px; }
+  .detail-info h2{ font-size:1.3rem; }
+  .detail-tabs{ display:flex; gap:4px; padding:0 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .detail-tabs button{ background:none; border:0; padding:10px 14px; font-weight:700; font-size:.82rem; color:var(--ink-faint); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .detail-tabs button[aria-selected="true"]{ color:var(--accent-strong); border-color:var(--accent); }
+  .detail-pane{ padding:20px; }
+  .detail-pane[hidden]{ display:none; }
+  .trust-breakdown{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  .trust-row span{ font-size:.76rem; color:var(--ink-soft); display:flex; justify-content:space-between; margin-bottom:5px; }
+  .trust-bar{ height:6px; border-radius:99px; background:var(--surface-2); overflow:hidden; }
+  .trust-bar i{ display:block; height:100%; background:var(--accent); border-radius:99px; }
+  .catalog-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+  .catalog-item{ border:1px solid var(--border); border-radius:var(--radius-s); padding:12px; }
+  .catalog-item .sw{ width:100%; aspect-ratio:4/3; border-radius:8px; margin-bottom:8px; }
+  .review{ border-bottom:1px solid var(--border); padding:14px 0; }
+  .review:last-child{ border-bottom:0; }
+  .stars{ color:var(--warning); font-size:.85rem; letter-spacing:1px; }
+  .activity-item{ display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .activity-item:last-child{ border-bottom:0; }
+  .activity-dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); margin-top:6px; flex:0 0 auto; }
+
+  .back-link{
+    display:inline-flex; align-self:flex-start; align-items:center; gap:6px;
+    font-size:.82rem; font-weight:700; font-family:inherit; color:var(--ink-soft); cursor:pointer;
+    background:none; border:0; padding:6px 0; margin:0;
+  }
+  .back-link:hover{ color:var(--ink); }
+  .back-link svg{ width:15px; height:15px; }
+
+  .suggest-item{ display:flex; align-items:center; gap:10px; padding:8px 0; }
+  .suggest-item .avatar-sm{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:800; font-size:.72rem; color:var(--ink); flex:0 0 auto; }
+  .suggest-item .info{ flex:1; min-width:0; }
+  .suggest-item .info b{ display:block; font-size:.82rem; }
+  .suggest-item .info span{ display:block; font-size:.72rem; color:var(--ink-faint); }
+
+  .founder-card{ display:flex; flex-direction:column; gap:8px; }
+  .founder-row{ display:flex; align-items:center; gap:10px; }
+  .founder-row .avatar-sm{ width:42px; height:42px; border-radius:11px; overflow:hidden; background:var(--surface-2); }
+  .founder-row .avatar-sm img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .founder-row .info{ min-width:0; }
+  .founder-row .info b{ display:block; }
+  .founder-row .info span{ display:block; margin-top:1px; }
+
+  footer{
+    margin-top:20px; border-top:1px solid var(--border); background:var(--surface);
+    padding:34px 20px 28px;
+  }
+  .footer-inner{ max-width:1240px; margin:0 auto; display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+  .footer-brand p{ color:var(--ink-soft); font-size:.84rem; max-width:36ch; margin-top:8px; }
+  .footer-cols{ display:flex; gap:44px; flex-wrap:wrap; }
+  .footer-col b{ display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:10px; }
+  .footer-col a{ display:block; font-size:.85rem; color:var(--ink-soft); text-decoration:none; padding:4px 0; }
+  .footer-col a:hover{ color:var(--ink); }
+  .footer-bottom{ max-width:1240px; margin:22px auto 0; padding-top:18px; border-top:1px solid var(--border); display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; color:var(--ink-faint); font-size:.78rem; }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+
+  /* ---------- auth dropdown (in-nav login/register) ---------- */
+  .auth-tabs{ display:flex; gap:4px; background:var(--surface-2); padding:4px; border-radius:999px; margin-bottom:18px; }
+  .auth-tabs button{
+    flex:1; border:0; background:transparent; padding:10px 12px; border-radius:999px;
+    font-weight:800; font-size:.84rem; color:var(--ink-soft); cursor:pointer;
+  }
+  .auth-tabs button[aria-selected="true"]{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow-sm); }
+  .auth-pane[hidden]{ display:none; }
+  .auth-pane h2{ font-size:1.3rem; margin-bottom:4px; }
+  .auth-pane .sub{ color:var(--ink-soft); font-size:.86rem; margin-bottom:20px; }
+  .auth-foot{ text-align:center; font-size:.82rem; color:var(--ink-soft); margin-top:18px; }
+  .auth-foot button{ background:none; border:0; color:var(--accent-strong); font-weight:700; cursor:pointer; padding:0; font-size:inherit; }
+  .field-hint{ font-size:.74rem; color:var(--ink-faint); margin-top:4px; }
+  .field textarea{
+    width:100%; border:1px solid var(--border); background:var(--surface-2); border-radius:var(--radius-s);
+    padding:9px 11px; font-size:.86rem; color:var(--ink); font-family:var(--font-body); outline:0; resize:vertical; min-height:64px;
+  }
+  .field textarea:focus{ border-color:var(--accent); }
+  .form-error{ font-size:.8rem; color:#B0273C; margin-top:2px; }
+</style>
+
+<div class="app">
+
+  <div id="appShell">
+
+  <header class="topbar">
+    <a class="brand" href="#" data-nav="mapa">
+      <svg class="logo-mark" viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
+        <rect x="4" y="15" width="32" height="10" rx="5" transform="rotate(-30 20 20)" fill="var(--accent)"></rect>
+        <rect x="4" y="15" width="32" height="10" rx="5" transform="rotate(30 20 20)" fill="var(--accent-2)" style="mix-blend-mode:multiply" opacity="0.92"></rect>
+      </svg>
+      <span class="brand-word">Nexora</span>
+    </a>
+
+    <button class="nav-toggle" id="navToggleBtn" aria-label="Abrir menú" aria-expanded="false" title="Menú">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+    </button>
+
+    <nav class="topnav" id="topNav">
+      <button data-nav="mapa" aria-current="true">Mapa</button>
+      <button data-nav="directorio">Directorio</button>
+      <button data-nav="rfq">Oportunidades</button>
+    </nav>
+
+    <div class="searchbox">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+      <input id="globalSearch" type="text" placeholder="Buscar empresas, categorías, ubicaciones…" />
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notificaciones" title="Notificaciones">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+      </button>
+      <button class="btn btn-outline btn-sm" id="authToggleBtn">Iniciar sesión</button>
+      <button class="my-avatar" id="myAvatarBtn" hidden title="Tu cuenta (clic para cerrar sesión)" aria-label="Tu cuenta">PE</button>
+
+      <div class="auth-dropdown" id="authDropdown" hidden>
+        <div class="auth-tabs" id="authTabs">
+          <button data-auth-tab="login" aria-selected="true">Iniciar sesión</button>
+          <button data-auth-tab="register" aria-selected="false">Registrar mi empresa</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="auth-pane" data-auth-pane="login">
+          <h2>Bienvenido de nuevo</h2>
+          <p class="sub">Entrá para ver la red de empresas verificadas de Nexora.</p>
+          <form id="loginForm">
+            <div class="field" style="margin-bottom:12px;"><label>Email</label><input type="email" id="loginEmail" placeholder="vos@empresa.com" required /></div>
+            <div class="field"><label>Contraseña</label><input type="password" id="loginPassword" placeholder="••••••••" required /></div>
+            <button type="submit" class="btn btn-accent btn-block" style="margin-top:18px;">Ingresar</button>
+          </form>
+          <div class="auth-foot">¿Tu empresa todavía no está registrada? <button type="button" data-auth-tab="register">Registrala acá</button></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div class="auth-pane" data-auth-pane="register" hidden>
+          <h2>Registrá tu empresa</h2>
+          <p class="sub">Sumate a la red con el mismo estándar del resto de los perfiles: contanos a qué te dedicás y, si tenés, una fuente pública que lo respalde.</p>
+          <form id="registerForm">
+            <div class="form-grid">
+              <div class="field"><label>Nombre de la empresa</label><input type="text" id="regEmpresa" placeholder="Ej: Servicios del Sur S.A." required /></div>
+              <div class="field"><label>Email de contacto</label><input type="email" id="regEmail" placeholder="contacto@empresa.com" required /></div>
+            </div>
+            <div class="form-grid" style="margin-top:12px;">
+              <div class="field">
+                <label>Categoría</label>
+                <select id="regVinculo" required>
+                  <option value="" disabled selected>Elegir…</option>
+                  <option>Proveedores</option>
+                  <option>Contratistas / EPC</option>
+                  <option>Proveedores tecnológicos</option>
+                  <option>Operadores / productoras</option>
+                  <option>Servicios profesionales</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="field"><label>Sector</label><input type="text" id="regSector" placeholder="Ej: Servicios industriales" required /></div>
+            </div>
+            <div class="field" style="margin-top:12px;"><label>Contraseña</label><input type="password" id="regPassword" placeholder="••••••••" required /></div>
+            <div class="field" style="margin-top:12px;">
+              <label>Fuente pública (opcional)</label>
+              <input type="url" id="regFuente" placeholder="Link a un comunicado, LinkedIn o sitio que respalde el vínculo" />
+              <div class="field-hint">Con fuente, tu ficha arranca con evidencia Media-Alta. Sin fuente, arranca en Media — el mismo criterio que usamos con el resto de la base.</div>
+            </div>
+            <div class="form-error" id="regError" hidden></div>
+            <button type="submit" class="btn btn-accent btn-block" style="margin-top:18px;">Crear perfil</button>
+          </form>
+          <div class="auth-foot">¿Ya tenés cuenta? <button type="button" data-auth-tab="login">Iniciar sesión</button></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="intro" id="introStrip">
+    <canvas id="netCanvas" aria-hidden="true"></canvas>
+    <div class="intro-inner">
+      <span class="intro-eyebrow">Red viva de empresas verificadas</span>
+      <h1>Así se conecta el ecosistema <em>energético</em> argentino.</h1>
+      <p>Cada punto es una empresa con perfil verificado y evidencia pública citada. No hay un centro ni un intermediario: es una red de pares, agrupada por rubro, donde cada perfil se puede auditar.</p>
+    </div>
+
+    <div class="map-stage">
+      <svg id="graphSvg" viewBox="-400 -400 800 800" role="img" aria-label="Mapa de empresas verificadas en la red"></svg>
+      <div class="map-legend">
+        <div>
+          <div class="legend-title">Evidencia · nivel de verificación</div>
+          <div id="legendRings"></div>
+        </div>
+        <div>
+          <div class="legend-title">Categoría · cluster en el mapa</div>
+          <div class="legend-group" id="legendCats"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="map-foot"><a data-nav="rfq">¿Tenés un requerimiento? Publicalo en Oportunidades →</a></p>
+  </section>
+
+  <main class="layout">
+
+    <!-- LEFT RAIL -->
+    <aside class="rail rail-left">
+      <div class="card profile-mini">
+        <div class="cover"></div>
+        <div class="body">
+          <div class="avatar-lg" id="accountAvatar" style="background:var(--surface-2);color:var(--ink-faint)">—</div>
+          <div>
+            <div class="name" id="accountName">Invitado</div>
+            <div class="role" id="accountRole">Iniciá sesión para crear tu perfil</div>
+          </div>
+          <div class="mini-stats" id="accountStats">
+            <div class="mini-stat"><b>44</b><span>Empresas en la red</span></div>
+            <div class="mini-stat"><b>35</b><span>Evidencia alta</span></div>
+            <div class="mini-stat"><b class="mono" style="color:var(--accent-strong)">5</b><span>Categorías</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="rail-title">Tu espacio</div>
+        <nav class="nav-list">
+          <a data-nav="mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2.6"></circle><circle cx="5" cy="6" r="2"></circle><circle cx="19" cy="7" r="2"></circle><circle cx="6" cy="18" r="2"></circle><circle cx="19" cy="17" r="2"></circle><path d="M12 12 5 6M12 12l7-5M12 12 6 18M12 12l7 5"></path></svg>Mapa</a>
+          <a data-nav="directorio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="9" cy="9" r="2.2"></circle><path d="M21 15l-4.5-4.5L9 18"></path></svg>Directorio</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 6v6c0 5 4 8 9 10 5-2 9-5 9-10V6l-9-4Z"></path></svg>Fuentes citadas</a>
+          <a data-nav="feed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17 9 11l4 4 8-8"></path></svg>Actividad</a>
+          <a data-nav="rfq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.3 2"></path></svg>Historial de RFQs</a>
+        </nav>
+      </div>
+
+      <div class="card card-pad">
+        <div class="rail-title">Categorías</div>
+        <div class="filters">
+          <span class="tag">Proveedores</span><span class="tag">Contratistas / EPC</span><span class="tag">Proveedores tecnológicos</span><span class="tag">Operadores / productoras</span><span class="tag">Servicios profesionales</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER -->
+    <section>
+
+      <!-- FEED -->
+      <div class="view" id="view-feed">
+        <div class="view-head">
+          <div>
+            <h2>Actividad reciente</h2>
+            <p>Novedades, evidencia citada y movimientos en el mapa de tu red.</p>
+          </div>
+        </div>
+
+        <div class="card card-pad composer">
+          <div class="composer-row">
+            <div class="avatar-lg" id="composerAvatar" style="width:40px;height:40px;border-radius:11px;border:0;font-size:.75rem;background:var(--surface-2);color:var(--ink-faint)">—</div>
+            <textarea id="composerText" placeholder="Comparte una novedad, disponibilidad o logro de tu empresa…" rows="1"></textarea>
+          </div>
+          <div class="composer-foot">
+            <span style="font-size:.76rem;color:var(--ink-faint)">Visible para toda tu red B2B</span>
+            <button class="btn btn-accent btn-sm" id="publishPost">Publicar</button>
+          </div>
+        </div>
+
+        <div id="feedList" class="view" style="gap:14px;"></div>
+      </div>
+
+      <!-- DIRECTORIO -->
+      <div class="view" id="view-directorio" hidden>
+        <div class="view-head">
+          <div>
+            <h2>Directorio de empresas</h2>
+            <p id="dirCount">Empresas verificadas en la red, con fuente y nivel de evidencia citados.</p>
+          </div>
+        </div>
+        <div class="filters" id="categoryFilters"></div>
+        <div class="grid-companies" id="companyGrid"></div>
+      </div>
+
+      <!-- RFQ -->
+      <div class="view" id="view-rfq" hidden>
+        <div class="view-head">
+          <div>
+            <h2>Oportunidades abiertas</h2>
+            <p>Requerimientos publicados por compradores de la red.</p>
+          </div>
+          <button class="btn btn-outline btn-sm" id="toggleRfqForm">+ Publicar requerimiento</button>
+        </div>
+
+        <div class="card card-pad" id="rfqForm" hidden>
+          <h3 style="font-size:1rem;margin-bottom:12px;">Nuevo requerimiento</h3>
+          <div class="form-grid">
+            <div class="field"><label>Categoría</label><input id="fCategoria" placeholder="p. ej. Empaque corrugado" /></div>
+            <div class="field"><label>Ubicación</label><input id="fUbicacion" placeholder="p. ej. León, GTO" /></div>
+            <div class="field"><label>Entrega requerida</label><input id="fEntrega" placeholder="p. ej. 15 de noviembre" /></div>
+            <div class="field"><label>Presupuesto estimado</label><input id="fPresupuesto" placeholder="p. ej. $80–120k MXN" /></div>
+          </div>
+          <div class="field" style="margin-top:12px;"><label>Título del requerimiento</label><input id="fTitulo" placeholder="p. ej. Empaque corrugado — 50,000 u/mes" /></div>
+          <div style="display:flex; gap:10px; margin-top:14px;">
+            <button class="btn btn-accent btn-sm" id="submitRfq">Publicar RFQ</button>
+            <span style="font-size:.76rem;color:var(--ink-faint); align-self:center;">Los proveedores relevantes de tu categoría serán notificados.</span>
+          </div>
+        </div>
+
+        <div id="rfqList" style="display:flex;flex-direction:column;gap:14px;"></div>
+      </div>
+
+      <!-- COMPANY DETAIL -->
+      <div class="view" id="view-detail" hidden>
+        <button class="back-link" id="backBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"></path></svg>
+          Volver
+        </button>
+        <div class="card" id="detailCard"></div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT RAIL -->
+    <aside class="rail rail-right">
+      <div class="card card-pad">
+        <div class="rail-title">Cómo se verifica un perfil</div>
+        <p style="font-size:.82rem;color:var(--ink-soft);line-height:1.5;">
+          Cada perfil se arma a partir de fuentes públicas — sitios corporativos, comunicados, LinkedIn, registros oficiales — citadas y clasificadas por nivel de evidencia (Alta, Media-Alta o Media). La evidencia indica qué tan verificable es el perfil de cada empresa, de forma independiente: no hay una empresa central de referencia.
+        </p>
+      </div>
+
+      <div class="card card-pad">
+        <div class="rail-title">Empresas sugeridas</div>
+        <div id="suggestList"></div>
+      </div>
+
+      <div class="card card-pad founder-card">
+        <div class="rail-title">Equipo fundador</div>
+        <div class="founder-row">
+          <div class="avatar-sm"><img src="data:image/jpeg;base64,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" alt="Alejandro Bulacio Moreno" /></div>
+          <div class="info"><b style="font-size:.85rem;">Alejandro Bulacio Moreno</b><span style="font-size:.74rem;color:var(--ink-faint);">Cofundador · Producto</span></div>
+        </div>
+        <div class="founder-row">
+          <div class="avatar-sm"><img src="data:image/jpeg;base64,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" alt="Nicolás Wilke" /></div>
+          <div class="info"><b style="font-size:.85rem;">Nicolás Wilke</b><span style="font-size:.74rem;color:var(--ink-faint);">Cofundador · Tecnología</span></div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a class="brand" href="#" data-nav="feed" style="text-decoration:none;">
+          <svg class="logo-mark" viewBox="0 0 40 40" width="28" height="28" aria-hidden="true">
+            <rect x="4" y="15" width="32" height="10" rx="5" transform="rotate(-30 20 20)" fill="var(--accent)"></rect>
+            <rect x="4" y="15" width="32" height="10" rx="5" transform="rotate(30 20 20)" fill="var(--accent-2)" style="mix-blend-mode:multiply" opacity="0.92"></rect>
+          </svg>
+          <span class="brand-word">Nexora</span>
+        </a>
+        <p>La red B2B donde proveedores y compradores construyen relaciones comerciales verificables — no solo contactos.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <b>Producto</b>
+          <a data-nav="feed">Inicio</a>
+          <a data-nav="directorio">Directorio</a>
+          <a data-nav="rfq">Oportunidades</a>
+        </div>
+        <div class="footer-col">
+          <b>Empresa</b>
+          <a href="#">Sobre Nexora</a>
+          <a href="#">Confianza Nexora</a>
+          <a href="#">Contacto</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Nexora. Todos los derechos reservados.</span>
+      <span>Ideado y desarrollado por Alejandro Bulacio Moreno &amp; Nicolás Wilke.</span>
+    </div>
+  </footer>
+
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var AVATAR_COLORS = ["var(--accent)","var(--accent-3)","#F7CBB4"];
+
+  var companies = [
+    { id:"halliburton", name:"Halliburton", vinculo:"Proveedores tecnológicos", sector:"Oil & Gas / Tecnología", descripcion:"Servicios y tecnología de perforación para operaciones no convencionales en Vaca Muerta.", evidencia:"Alta", periodo:"2026", fuente:"https://ir.halliburton.com/news-releases/news-release-details/pampa-energia-selects-halliburton-support-enterprise-digital", initials:"HA", color:0 },
+    { id:"sacde", name:"SACDE", vinculo:"Contratistas / EPC", sector:"Ingeniería y construcción", descripcion:"Construcción y montaje industrial de gran escala para proyectos de energía en la Patagonia.", evidencia:"Alta", periodo:"2024-2026", fuente:"https://pampa.com/prensa/con-una-inversion-de-us-2-700-millones-pampa-energia-construira-la-planta-de-urea-mas-grande-de-la-region-y-una-de-las-mas-grandes-del-mundo/", initials:"SA", color:1 },
+    { id:"tecnimont", name:"Tecnimont", vinculo:"Contratistas / EPC", sector:"Ingeniería y construcción", descripcion:"Ingeniería, procurement y construcción (EPC) para plantas de proceso industrial a gran escala.", evidencia:"Alta", periodo:"2026", fuente:"https://ri.pampa.com/press-release/pampa-ingresa-al-negocio-de-fertilizantes-con-la-construccion-de-la-mayor-planta-de-urea-de-latam/", initials:"TE", color:2 },
+    { id:"maire", name:"MAIRE", vinculo:"Contratistas / EPC", sector:"Ingeniería industrial", descripcion:"Grupo internacional de ingeniería industrial especializado en proyectos EPC de energía y fertilizantes.", evidencia:"Alta", periodo:"2026", fuente:"https://pampa.com/prensa/con-una-inversion-de-us-2-700-millones-pampa-energia-construira-la-planta-de-urea-mas-grande-de-la-region-y-una-de-las-mas-grandes-del-mundo/", initials:"MA", color:0 },
+    { id:"nextchem", name:"Nextchem", vinculo:"Proveedores tecnológicos", sector:"Tecnología de procesos", descripcion:"Tecnología de procesos para la industria química y de fertilizantes.", evidencia:"Alta", periodo:"2026", fuente:"https://pampa.com/prensa/con-una-inversion-de-us-2-700-millones-pampa-energia-construira-la-planta-de-urea-mas-grande-de-la-region-y-una-de-las-mas-grandes-del-mundo/", initials:"NE", color:1 },
+    { id:"stamicarbon", name:"Stamicarbon", vinculo:"Proveedores tecnológicos", sector:"Fertilizantes / tecnología", descripcion:"Licenciante de tecnología para plantas de urea y fertilizantes nitrogenados.", evidencia:"Alta", periodo:"2026", fuente:"https://pampa.com/prensa/con-una-inversion-de-us-2-700-millones-pampa-energia-construira-la-planta-de-urea-mas-grande-de-la-region-y-una-de-las-mas-grandes-del-mundo/", initials:"ST", color:2 },
+    { id:"kbr", name:"KBR", vinculo:"Proveedores tecnológicos", sector:"Fertilizantes / ingeniería", descripcion:"Tecnología e ingeniería de procesos para plantas de fertilizantes.", evidencia:"Alta", periodo:"2026", fuente:"https://pampa.com/prensa/con-una-inversion-de-us-2-700-millones-pampa-energia-construira-la-planta-de-urea-mas-grande-de-la-region-y-una-de-las-mas-grandes-del-mundo/", initials:"KB", color:0 },
+    { id:"rakiduam", name:"Rakiduam", vinculo:"Contratistas / EPC", sector:"Oil & Gas / Facilidades", descripcion:"Construcción y puesta en marcha de instalaciones de tratamiento de petróleo y gas en Vaca Muerta.", evidencia:"Alta", periodo:"2025", fuente:"https://es.linkedin.com/posts/rakiduamn_proyecto-ic%C3%B3nico-en-rinc%C3%B3n-de-aranda-neuqu%C3%A9n-activity-7314365814508261376-Wcg2", initials:"RA", color:1 },
+    { id:"grupo-provemet", name:"Grupo Provemet", vinculo:"Proveedores", sector:"Metalúrgica / piping", descripcion:"Fabricación metalúrgica y piping para proyectos industriales de energía.", evidencia:"Media-Alta", periodo:"2026", fuente:"https://ar.linkedin.com/in/diego-kreszes-84079084", initials:"GP", color:2 },
+    { id:"tyc-s-a", name:"TYC S.A.", vinculo:"Proveedores", sector:"Ingeniería / fabricación", descripcion:"Ingeniería y fabricación para la cadena de valor de Vaca Muerta.", evidencia:"Media-Alta", periodo:"2026", fuente:"https://www.linkedin.com/company/tyc-sa/", initials:"TS", color:0 },
+    { id:"msi-montajes-y-servicios-industriales", name:"MSI - Montajes y Servicios Industriales", vinculo:"Proveedores", sector:"Servicios industriales / calibración / ensayos", descripcion:"Montajes industriales, calibración y ensayos para el sector energético.", evidencia:"Alta", periodo:"2026", fuente:"https://msi.ar/", initials:"MM", color:1 },
+    { id:"kompass-srl", name:"Kompass SRL", vinculo:"Proveedores", sector:"Servicios petroleros", descripcion:"Servicios petroleros para operaciones de exploración y producción.", evidencia:"Alta", periodo:"2026", fuente:"https://kompasssrl.com/", initials:"KO", color:2 },
+    { id:"la-colonia", name:"La Colonia", vinculo:"Proveedores", sector:"Combustibles y lubricantes", descripcion:"Distribución de combustibles y lubricantes industriales.", evidencia:"Alta", periodo:"2026", fuente:"https://lacolonia.com.ar/servicios/", initials:"CO", color:0 },
+    { id:"emu-s-a", name:"EMU S.A.", vinculo:"Proveedores", sector:"Equipos industriales / Oil & Gas", descripcion:"Equipos industriales para el sector Oil & Gas.", evidencia:"Alta", periodo:"2026", fuente:"https://www.emu.com.ar/", initials:"ES", color:1 },
+    { id:"ca-group", name:"CA Group", vinculo:"Servicios profesionales", sector:"Servicios empresariales", descripcion:"Servicios empresariales tercerizados para compañías industriales.", evidencia:"Alta", periodo:"2026", fuente:"https://cagroup.com.ar/nosotros/", initials:"CG", color:2 },
+    { id:"howest", name:"Howest", vinculo:"Proveedores", sector:"Equipamiento eléctrico", descripcion:"Equipamiento eléctrico para instalaciones industriales.", evidencia:"Alta", periodo:"2026", fuente:"https://www.howest.com.ar/", initials:"HO", color:0 },
+    { id:"ipe-energia", name:"IPE Energía", vinculo:"Servicios profesionales", sector:"Ingeniería / energía / Oil & Gas", descripcion:"Ingeniería y servicios técnicos para el sector energético.", evidencia:"Alta", periodo:"2026", fuente:"https://ipe-energia.com/clientes/", initials:"IE", color:1 },
+    { id:"fricsa", name:"FRICSA", vinculo:"Proveedores", sector:"Servicios industriales / Oil & Gas", descripcion:"Servicios industriales para operaciones de Oil & Gas.", evidencia:"Alta", periodo:"2025", fuente:"https://fricsa.com.ar/wp-content/uploads/2025/10/Presentacion-FRICSA-S.A.-Rev16.pdf", initials:"FR", color:2 },
+    { id:"gevelux", name:"Gevelux", vinculo:"Proveedores", sector:"Materiales eléctricos APE", descripcion:"Materiales y soluciones eléctricas para proyectos industriales.", evidencia:"Alta", periodo:"2026", fuente:"https://www.gevelux.com/", initials:"GE", color:0 },
+    { id:"inteligentia", name:"Inteligentia", vinculo:"Servicios profesionales", sector:"IA / transformación digital", descripcion:"Soluciones de inteligencia artificial y transformación digital para empresas.", evidencia:"Alta", periodo:"2026", fuente:"https://inteligentia.ai/", initials:"IN", color:1 },
+    { id:"synvelt", name:"Synvelt", vinculo:"Servicios profesionales", sector:"Transformación digital / IT", descripcion:"Transformación digital y servicios de TI para el sector industrial.", evidencia:"Alta", periodo:"2026", fuente:"https://www.synvelt.com/", initials:"SY", color:2 },
+    { id:"sumiservices", name:"Sumiservices", vinculo:"Proveedores", sector:"Suministros industriales", descripcion:"Abastecimiento de suministros industriales.", evidencia:"Media-Alta", periodo:"2026", fuente:"https://sumiservices.net/", initials:"SU", color:0 },
+    { id:"patagonia-resources", name:"Patagonia Resources", vinculo:"Servicios profesionales", sector:"RR.HH. / servicios para energía", descripcion:"Servicios de recursos humanos para la industria energética patagónica.", evidencia:"Media-Alta", periodo:"2026", fuente:"https://patagoniaresources.com.ar/es/nosotros", initials:"PR", color:1 },
+    { id:"comitans", name:"COMITANS", vinculo:"Servicios profesionales", sector:"Ingeniería / proyectos / gestión comercial", descripcion:"Consultoría en ingeniería, proyectos y gestión comercial.", evidencia:"Media-Alta", periodo:"2026", fuente:"https://www.comitans.com/es/mercados/clientes/", initials:"CO", color:2 },
+    { id:"enausa", name:"ENAUSA", vinculo:"Proveedores", sector:"Combustibles B2B", descripcion:"Comercialización de combustibles B2B para generación térmica.", evidencia:"Alta", periodo:"2026", fuente:"https://www.enausa.com.ar/industrias/generacion", initials:"EN", color:0 },
+    { id:"tenaris", name:"Tenaris", vinculo:"Proveedores", sector:"Tubulares / Oil & Gas", descripcion:"Fabricación de tubos de acero sin costura para la industria Oil & Gas.", evidencia:"Media", periodo:"2025-2026", fuente:"https://www.tenaris.com/", initials:"TE", color:1 },
+    { id:"techint", name:"Techint", vinculo:"Contratistas / EPC", sector:"Ingeniería y construcción", descripcion:"Ingeniería y construcción de infraestructura energética.", evidencia:"Media", periodo:"Histórica", fuente:"https://www.techint.com/", initials:"TE", color:2 },
+    { id:"siemens", name:"Siemens", vinculo:"Proveedores tecnológicos", sector:"Generación eléctrica", descripcion:"Tecnología y equipamiento para generación eléctrica.", evidencia:"Media", periodo:"Histórica", fuente:"https://www.siemens-energy.com/", initials:"SI", color:0 },
+    { id:"wartsila", name:"Wärtsilä", vinculo:"Proveedores tecnológicos", sector:"Generación eléctrica", descripcion:"Motores, generación y servicios de operación y mantenimiento para plantas de energía.", evidencia:"Media-Alta", periodo:"Histórica", fuente:"https://www.wartsila.com/", initials:"WÄ", color:1 },
+    { id:"ypf", name:"YPF", vinculo:"Operadores / productoras", sector:"Oil & Gas", descripcion:"Operadora integrada de petróleo y gas, líder en Vaca Muerta.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://ri.pampa.com/nuestros-activos/petroleo-y-gas/exploracion-y-produccion-ep/", initials:"YP", color:2 },
+    { id:"pan-american-energy-pae", name:"Pan American Energy (PAE)", vinculo:"Operadores / productoras", sector:"Oil & Gas / LNG", descripcion:"Productora de petróleo y gas con proyectos de exportación de GNL.", evidencia:"Alta", periodo:"2024-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426001793/ex99-1.htm", initials:"PA", color:0 },
+    { id:"harbour-energy", name:"Harbour Energy", vinculo:"Operadores / productoras", sector:"Oil & Gas / LNG", descripcion:"Compañía internacional de exploración y producción de Oil & Gas.", evidencia:"Alta", periodo:"2024-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426001793/ex99-1.htm", initials:"HE", color:1 },
+    { id:"golar", name:"Golar", vinculo:"Proveedores tecnológicos", sector:"LNG", descripcion:"Infraestructura flotante de licuefacción de gas natural (FLNG).", evidencia:"Alta", periodo:"2024-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426001793/ex99-1.htm", initials:"GO", color:2 },
+    { id:"vista-energy", name:"Vista Energy", vinculo:"Operadores / productoras", sector:"Oil & Gas", descripcion:"Operadora independiente de petróleo no convencional en Vaca Muerta.", evidencia:"Alta", periodo:"2024-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426001793/ex99-1.htm", initials:"VE", color:0 },
+    { id:"pluspetrol", name:"Pluspetrol", vinculo:"Operadores / productoras", sector:"Oil & Gas", descripcion:"Productora de petróleo y gas con operaciones en Vaca Muerta.", evidencia:"Alta", periodo:"2024-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426001793/ex99-1.htm", initials:"PL", color:1 },
+    { id:"transportadora-de-gas-del-sur-tgs", name:"Transportadora de Gas del Sur (TGS)", vinculo:"Operadores / productoras", sector:"Midstream / gas", descripcion:"Transporte de gas natural y procesamiento de líquidos en el sistema troncal sur.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://ri.pampa.com/nuestros-activos/petroleo-y-gas/midstream/transportadora-del-gas-de-sur-tgs/", initials:"TG", color:2 },
+    { id:"ciesa", name:"CIESA", vinculo:"Operadores / productoras", sector:"Midstream", descripcion:"Holding de infraestructura de transporte de gas natural.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426002185/ex08-1.htm", initials:"CI", color:0 },
+    { id:"transener", name:"Transener", vinculo:"Operadores / productoras", sector:"Transmisión eléctrica", descripcion:"Transmisión de energía eléctrica de alta tensión.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426002185/ex08-1.htm", initials:"TR", color:1 },
+    { id:"citelec", name:"Citelec", vinculo:"Operadores / productoras", sector:"Transmisión eléctrica", descripcion:"Holding de control del sistema de transmisión eléctrica.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426002185/ex08-1.htm", initials:"CI", color:2 },
+    { id:"oldelval", name:"OldelVal", vinculo:"Operadores / productoras", sector:"Oleoductos", descripcion:"Transporte de petróleo crudo por oleoducto desde la cuenca neuquina.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426002185/ex08-1.htm", initials:"OL", color:0 },
+    { id:"vmos", name:"VMOS", vinculo:"Operadores / productoras", sector:"Oleoductos / logística", descripcion:"Proyecto de oleoducto para exportación de crudo desde Vaca Muerta.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426001793/ex99-1.htm", initials:"VM", color:1 },
+    { id:"southern-energy", name:"Southern Energy", vinculo:"Operadores / productoras", sector:"LNG", descripcion:"Proyecto de exportación de GNL desde Argentina.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426001793/ex99-1.htm", initials:"SE", color:2 },
+    { id:"san-matias-pipeline", name:"San Matías Pipeline", vinculo:"Operadores / productoras", sector:"Midstream / gas", descripcion:"Transporte de gas natural en la región patagónica.", evidencia:"Alta", periodo:"2025-2026", fuente:"https://www.sec.gov/Archives/edgar/data/1469395/000129281426002185/ex08-1.htm", initials:"SM", color:0 },
+    { id:"pampa-energia", name:"Pampa Energía", vinculo:"Operadores / productoras", sector:"Energía integrada · Oil & Gas / Generación", descripcion:"Compañía integrada de energía: exploración y producción de petróleo y gas, generación eléctrica y petroquímica.", evidencia:"Alta", periodo:"2026", fuente:"https://ri.pampa.com/", initials:"PE", color:1 }
+  ];
+
+  var companyById = {};
+  companies.forEach(function(c){ companyById[c.id] = c; });
+
+  var userPosts = [];
+
+  var rfqs = [
+    { id:1, title:"Empaque corrugado — 50,000 u/mes", buyer:"Grupo Alimenta", category:"Empaque corrugado", location:"León, GTO", budget:"$80–120k MXN", deadline:"15 nov", quotes:6, match:96 },
+    { id:2, title:"Transporte refrigerado ruta CDMX–Monterrey", buyer:"Distribuidora Rialto", category:"Logística", location:"CDMX", budget:"$45–60k MXN/mes", deadline:"30 oct", quotes:4, match:88 },
+    { id:3, title:"Insumos químicos grado alimenticio", buyer:"Lácteos del Centro", category:"Químicos", location:"Querétaro, QRO", budget:"$200k MXN", deadline:"5 dic", quotes:9, match:81 },
+    { id:4, title:"Componentes metálicos troquelados", buyer:"AutoParts Saltillo", category:"Metalmecánica", location:"Saltillo, COAH", budget:"$150–300k MXN", deadline:"20 nov", quotes:5, match:74 }
+  ];
+
+  function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+  function uniq(a){ return a.filter(function(v,i){ return a.indexOf(v)===i; }); }
+
+  function evidenceBadge(level){
+    var bg = level === "Alta" ? "color-mix(in srgb, var(--accent-2) 45%, white)" : level === "Media-Alta" ? "color-mix(in srgb, var(--accent) 32%, white)" : "var(--surface-2)";
+    var dot = level === "Alta" ? "var(--accent-2-strong)" : level === "Media-Alta" ? "var(--accent-strong)" : "var(--ink-faint)";
+    return '<span class="tag" style="display:inline-flex;align-items:center;gap:6px;background:'+bg+';color:var(--ink);">'+
+      '<span style="width:6px;height:6px;border-radius:50%;background:'+dot+';display:inline-block;flex:0 0 auto;"></span>Evidencia '+esc(level)+'</span>';
+  }
+
+  function selfTag(c){
+    if(!c.selfRegistered) return '';
+    return '<span class="tag" style="color:var(--accent-3-strong);">Autodeclarado por la empresa</span>';
+  }
+
+  function fuenteLink(url, label){
+    return '<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent-strong);font-size:.8rem;font-weight:700;text-decoration:none;">'+
+      esc(label || 'Ver fuente pública')+
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17 17 7M9 7h8v8"></path></svg></a>';
+  }
+
+  function vinculoGroup(c){
+    return c.vinculo || "Proveedores";
+  }
+
+  /* ---------- network map ---------- */
+  // No hub: every company is a peer node. Nodes settle into loose clusters by
+  // category (shared rubro), never by a bilateral relationship we can't verify.
+  var EVIDENCE_COLOR = { "Alta":"var(--accent-2-strong)", "Media-Alta":"var(--accent)", "Media":"var(--accent-3)" };
+  var mapFilterCat = null;
+  var meshCache = null;
+
+  function computeMeshLayout(list, cats){
+    var n = cats.length || 1;
+    var anchorR = 175;
+    var anchors = {};
+    cats.forEach(function(cat, i){
+      var ang = (-90 + i*(360/n)) * Math.PI/180;
+      anchors[cat] = { x: anchorR*Math.cos(ang), y: anchorR*Math.sin(ang) };
+    });
+
+    var nodes = list.map(function(c){
+      var cat = vinculoGroup(c);
+      var a = anchors[cat] || {x:0,y:0};
+      var jitter = 46;
+      return { id:c.id, cat:cat, x:a.x+(Math.random()-.5)*jitter*2, y:a.y+(Math.random()-.5)*jitter*2, vx:0, vy:0 };
+    });
+
+    for(var it=0; it<200; it++){
+      for(var i=0;i<nodes.length;i++){
+        for(var j=i+1;j<nodes.length;j++){
+          var A=nodes[i], B=nodes[j];
+          var dx=A.x-B.x, dy=A.y-B.y;
+          var d = Math.sqrt(dx*dx+dy*dy) || 0.01;
+          if(d < 68){
+            var force = (68-d)/68 * 1.7;
+            var fx = dx/d*force, fy = dy/d*force;
+            A.vx += fx; A.vy += fy; B.vx -= fx; B.vy -= fy;
+          }
+        }
+      }
+      for(var k=0;k<nodes.length;k++){
+        var nd = nodes[k], a = anchors[nd.cat] || {x:0,y:0};
+        nd.vx += (a.x - nd.x) * 0.02;
+        nd.vy += (a.y - nd.y) * 0.02;
+      }
+      for(var m=0;m<nodes.length;m++){
+        nodes[m].vx *= 0.8; nodes[m].vy *= 0.8;
+        nodes[m].x += nodes[m].vx; nodes[m].y += nodes[m].vy;
+      }
+    }
+
+    var pos = {}, labelPos = {};
+    nodes.forEach(function(nd){ pos[nd.id] = { x:nd.x, y:nd.y }; });
+    cats.forEach(function(cat){
+      var own = nodes.filter(function(nd){ return nd.cat === cat; });
+      var cx = own.reduce(function(s,nd){ return s+nd.x; },0) / (own.length||1);
+      var cy = own.reduce(function(s,nd){ return s+nd.y; },0) / (own.length||1);
+      var d = Math.sqrt(cx*cx+cy*cy) || 1;
+      var reach = Math.max.apply(null, own.map(function(nd){ return Math.sqrt(Math.pow(nd.x-cx,2)+Math.pow(nd.y-cy,2)); }).concat([30]));
+      var scale = (d + reach + 20) / d;
+      var lx = cx*scale, ly = cy*scale;
+      var ld = Math.sqrt(lx*lx+ly*ly) || 1;
+      // labels grow outward (away from origin), so the clamp has to leave room
+      // for the text's own width too, or a long label clips past the canvas edge
+      var textW = cat.length * 5.4;
+      var maxD = 396 - textW;
+      if(ld > maxD){ lx = lx/ld*maxD; ly = ly/ld*maxD; }
+      labelPos[cat] = { x: lx, y: ly };
+    });
+
+    // connect each node to its 2 nearest same-category peers — a real,
+    // verifiable signal (shared rubro), never an invented bilateral deal
+    var edges = [], seen = {};
+    nodes.forEach(function(nd){
+      var peers = nodes.filter(function(o){ return o.cat === nd.cat && o.id !== nd.id; });
+      peers.sort(function(a,b){
+        return (Math.pow(a.x-nd.x,2)+Math.pow(a.y-nd.y,2)) - (Math.pow(b.x-nd.x,2)+Math.pow(b.y-nd.y,2));
+      });
+      peers.slice(0,2).forEach(function(o){
+        var key = [nd.id,o.id].sort().join("|");
+        if(seen[key]) return;
+        seen[key] = true;
+        edges.push({ a:nd.id, b:o.id, cat:nd.cat });
+      });
+    });
+
+    return { pos:pos, labelPos:labelPos, edges:edges };
+  }
+
+  function renderMap(){
+    var svg = document.getElementById("graphSvg");
+    if(!svg) return;
+    var cats = uniq(companies.map(vinculoGroup));
+    if(!meshCache || meshCache.count !== companies.length){
+      meshCache = computeMeshLayout(companies, cats);
+      meshCache.count = companies.length;
+    }
+    var layout = meshCache;
+    var pos = layout.pos;
+
+    var parts = [];
+
+    cats.forEach(function(cat){
+      var lp = layout.labelPos[cat]; if(!lp) return;
+      var anchor = lp.x < -12 ? "end" : lp.x > 12 ? "start" : "middle";
+      parts.push('<text class="cluster-label" x="'+lp.x.toFixed(1)+'" y="'+lp.y.toFixed(1)+'" text-anchor="'+anchor+'">'+esc(cat)+'</text>');
+    });
+
+    layout.edges.forEach(function(e){
+      var pa = pos[e.a], pb = pos[e.b]; if(!pa || !pb) return;
+      parts.push('<line class="edge" data-cat="'+esc(e.cat)+'" x1="'+pa.x.toFixed(1)+'" y1="'+pa.y.toFixed(1)+'" x2="'+pb.x.toFixed(1)+'" y2="'+pb.y.toFixed(1)+'" />');
+    });
+    companies.forEach(function(c){
+      var p = pos[c.id]; if(!p) return;
+      var color = EVIDENCE_COLOR[c.evidencia] || EVIDENCE_COLOR["Media"];
+      parts.push(
+        '<g class="node" data-id="'+esc(c.id)+'" data-cat="'+esc(vinculoGroup(c))+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+')" tabindex="0" role="button" aria-label="'+esc(c.name)+', '+esc(c.vinculo)+', evidencia '+esc(c.evidencia)+'">'+
+          '<circle r="9" fill="'+color+'"></circle>'+
+          '<title>'+esc(c.name)+' — '+esc(c.vinculo)+' — Evidencia '+esc(c.evidencia)+'</title>'+
+        '</g>'
+      );
+    });
+
+    svg.innerHTML = parts.join('');
+
+    svg.querySelectorAll('.node').forEach(function(n){
+      n.addEventListener('click', function(){ openCompany(n.getAttribute('data-id')); });
+      n.addEventListener('keydown', function(ev){ if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); openCompany(n.getAttribute('data-id')); } });
+    });
+
+    renderMapLegend(cats);
+    applyMapFilter();
+  }
+
+  function renderMapLegend(cats){
+    var ringsEl = document.getElementById("legendRings");
+    if(ringsEl){
+      ringsEl.innerHTML = ["Alta","Media-Alta","Media"].map(function(lv){
+        return '<div class="legend-row"><span class="legend-dot" style="background:'+EVIDENCE_COLOR[lv]+'"></span>Evidencia '+lv+'</div>';
+      }).join('');
+    }
+    var catsEl = document.getElementById("legendCats");
+    if(catsEl){
+      catsEl.innerHTML = '<button class="chip" data-mapcat="" aria-pressed="'+(!mapFilterCat)+'">Todas</button>' +
+        cats.map(function(cat){
+          return '<button class="chip" data-mapcat="'+esc(cat)+'" aria-pressed="'+(mapFilterCat===cat)+'">'+esc(cat)+'</button>';
+        }).join('');
+      catsEl.querySelectorAll('[data-mapcat]').forEach(function(b){
+        b.addEventListener('click', function(){
+          var v = b.getAttribute('data-mapcat');
+          mapFilterCat = v ? v : null;
+          renderMapLegend(cats);
+          applyMapFilter();
+        });
+      });
+    }
+  }
+
+  function applyMapFilter(){
+    var svg = document.getElementById("graphSvg");
+    if(!svg) return;
+    svg.querySelectorAll('.node, .edge').forEach(function(el){
+      var match = !mapFilterCat || el.getAttribute('data-cat') === mapFilterCat;
+      el.classList.toggle('dim', !match);
+    });
+  }
+
+  /* ---------- account / auth ---------- */
+  var currentUser = null;
+
+  function slugify(name){
+    var base = name.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+    if(!base) base = "empresa";
+    var id = base, n = 2;
+    while(companyById[id]){ id = base+"-"+n; n++; }
+    return id;
+  }
+  function initialsOf(name){
+    var words = name.trim().split(/\s+/).filter(Boolean);
+    if(!words.length) return "EM";
+    if(words.length === 1) return words[0].slice(0,2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  function renderAccount(){
+    if(!currentUser) return;
+    var initials = currentUser.initials, name = currentUser.name;
+    document.getElementById("myAvatarBtn").textContent = initials;
+    document.getElementById("myAvatarBtn").title = name + " — tu cuenta (clic para cerrar sesión)";
+    document.getElementById("accountAvatar").textContent = initials;
+    document.getElementById("composerAvatar").textContent = initials;
+    document.getElementById("accountName").textContent = name;
+    document.getElementById("accountRole").textContent = currentUser.vinculo + " · " + currentUser.sector;
+
+    // Stats are about the network as a whole, not about any one company —
+    // nobody gets a privileged "my network" view anymore.
+    var alta = companies.filter(function(c){ return c.evidencia === "Alta"; }).length;
+    var cats = uniq(companies.map(vinculoGroup)).length;
+    document.getElementById("accountStats").innerHTML =
+      '<div class="mini-stat"><b>'+companies.length+'</b><span>Empresas en la red</span></div>'+
+      '<div class="mini-stat"><b>'+alta+'</b><span>Evidencia alta</span></div>'+
+      '<div class="mini-stat"><b class="mono" style="color:var(--accent-strong)">'+cats+'</b><span>Categorías</span></div>';
+  }
+
+  // No more full-page gate: the map and directory are public. Login/register
+  // live in a small dropdown off the nav, and only actions that need an
+  // identity (posting, publishing an RFQ) actually ask for one.
+  function refreshAuthUI(){
+    var loggedIn = !!currentUser;
+    document.getElementById("authToggleBtn").hidden = loggedIn;
+    document.getElementById("myAvatarBtn").hidden = !loggedIn;
+    if(loggedIn) renderAccount();
+  }
+
+  function openAuthDropdown(tab){
+    switchAuthTab(tab || "login");
+    document.getElementById("authDropdown").hidden = false;
+  }
+  function closeAuthDropdown(){
+    document.getElementById("authDropdown").hidden = true;
+  }
+
+  function bootApp(){
+    if(window.__resizeNetCanvas) window.__resizeNetCanvas();
+    refreshAuthUI();
+    renderFeed();
+    renderCategoryFilters();
+    renderDirectory();
+    renderRfq();
+    renderSuggestions();
+    switchView("mapa");
+  }
+
+  function switchAuthTab(tab){
+    document.querySelectorAll("#authTabs [data-auth-tab]").forEach(function(b){
+      b.setAttribute("aria-selected", b.getAttribute("data-auth-tab") === tab ? "true" : "false");
+    });
+    document.querySelectorAll(".auth-pane").forEach(function(p){
+      p.hidden = p.getAttribute("data-auth-pane") !== tab;
+    });
+  }
+  document.querySelectorAll("[data-auth-tab]").forEach(function(b){
+    b.addEventListener("click", function(){ switchAuthTab(b.getAttribute("data-auth-tab")); });
+  });
+
+  document.getElementById("authToggleBtn").addEventListener("click", function(){
+    closeMobileNav();
+    var dd = document.getElementById("authDropdown");
+    if(dd.hidden) openAuthDropdown("login"); else closeAuthDropdown();
+  });
+
+  // ---------- mobile hamburger nav ----------
+  function closeMobileNav(){
+    var nav = document.getElementById("topNav");
+    nav.setAttribute("data-open", "false");
+    document.getElementById("navToggleBtn").setAttribute("aria-expanded", "false");
+  }
+  document.getElementById("navToggleBtn").addEventListener("click", function(){
+    closeAuthDropdown();
+    var nav = document.getElementById("topNav");
+    var open = nav.getAttribute("data-open") === "true";
+    nav.setAttribute("data-open", open ? "false" : "true");
+    this.setAttribute("aria-expanded", open ? "false" : "true");
+  });
+
+  document.addEventListener("click", function(ev){
+    var dd = document.getElementById("authDropdown");
+    if(!dd.hidden && !dd.contains(ev.target) && !ev.target.closest("#authToggleBtn")){
+      closeAuthDropdown();
+    }
+    var nav = document.getElementById("topNav");
+    if(nav.getAttribute("data-open") === "true" && !nav.contains(ev.target) && !ev.target.closest("#navToggleBtn")){
+      closeMobileNav();
+    }
+  });
+
+  document.getElementById("loginForm").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    currentUser = companyById["pampa-energia"];
+    refreshAuthUI();
+    closeAuthDropdown();
+  });
+
+  document.getElementById("registerForm").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var empresa = document.getElementById("regEmpresa").value.trim();
+    var vinculo = document.getElementById("regVinculo").value;
+    var sector = document.getElementById("regSector").value.trim();
+    var fuente = document.getElementById("regFuente").value.trim();
+    var errEl = document.getElementById("regError");
+
+    if(!empresa || !vinculo || !sector){
+      errEl.textContent = "Completá empresa, categoría y sector para crear el perfil.";
+      errEl.hidden = false;
+      return;
+    }
+    errEl.hidden = true;
+
+    var record = {
+      id: slugify(empresa), name: empresa, vinculo: vinculo, sector: sector,
+      descripcion: "", evidencia: fuente ? "Media-Alta" : "Media",
+      periodo: "", fuente: fuente, initials: initialsOf(empresa),
+      color: companies.length % 3, selfRegistered: true
+    };
+    companies.unshift(record);
+    companyById[record.id] = record;
+    currentUser = record;
+    renderCategoryFilters();
+    renderDirectory();
+    renderSuggestions();
+    refreshAuthUI();
+    closeAuthDropdown();
+    openCompany(record.id);
+  });
+
+  document.getElementById("myAvatarBtn").addEventListener("click", function(){
+    currentUser = null;
+    refreshAuthUI();
+  });
+
+  /* ---------- render: feed ---------- */
+  function renderFeed(){
+    var el = document.getElementById("feedList");
+    var items = userPosts.concat(companies);
+    el.innerHTML = items.map(function(it){
+      if(it.__user){
+        return '<article class="card card-pad">'+
+          '<div class="post-head">'+
+            '<div class="avatar-lg" style="width:42px;height:42px;border-radius:11px;border:0;font-size:.78rem;color:var(--ink);background:var(--accent-2)">'+it.initials+'</div>'+
+            '<div><div class="post-name">'+esc(it.name)+'</div><div class="post-meta">'+esc(it.sector)+' · '+esc(it.time)+'</div></div>'+
+          '</div>'+
+          '<p class="post-text">'+esc(it.text)+'</p>'+
+        '</article>';
+      }
+      var c = it;
+      return '<article class="card card-pad">'+
+        '<div class="post-head">'+
+          '<div class="avatar-lg" style="width:42px;height:42px;border-radius:11px;border:0;font-size:.78rem;color:var(--ink);background:'+AVATAR_COLORS[c.color]+'">'+c.initials+'</div>'+
+          '<div><div class="post-name">'+esc(c.name)+'</div><div class="post-meta">'+esc(c.sector)+'</div></div>'+
+        '</div>'+
+        '<p class="post-text"><strong>'+esc(c.vinculo)+'.</strong>'+(c.descripcion ? ' '+esc(c.descripcion) : '')+'</p>'+
+        '<div class="post-tags">'+evidenceBadge(c.evidencia)+selfTag(c)+'</div>'+
+        '<div class="post-actions">'+
+          (c.fuente ? fuenteLink(c.fuente) : '<span style="font-size:.78rem;color:var(--ink-faint);">Sin fuente pública</span>')+
+          '<button data-goto="'+c.id+'" style="margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12h6M12 9v6"></path></svg>Ver ficha</button>'+
+        '</div>'+
+      '</article>';
+    }).join('');
+    el.querySelectorAll('[data-goto]').forEach(function(b){ b.addEventListener('click', function(){ openCompany(b.getAttribute('data-goto')); }); });
+  }
+
+  /* ---------- render: directory ---------- */
+  var categories = ["Todos"].concat(uniq(companies.map(vinculoGroup)));
+  var activeCategory = "Todos";
+
+  function renderCategoryFilters(){
+    var el = document.getElementById("categoryFilters");
+    el.innerHTML = categories.map(function(cat){
+      return '<button class="chip" data-cat="'+esc(cat)+'" aria-pressed="'+(cat===activeCategory)+'">'+esc(cat)+'</button>';
+    }).join('');
+    el.querySelectorAll('[data-cat]').forEach(function(b){
+      b.addEventListener('click', function(){ activeCategory = b.getAttribute('data-cat'); renderCategoryFilters(); renderDirectory(); });
+    });
+  }
+
+  function renderDirectory(){
+    var q = (document.getElementById("globalSearch").value || "").toLowerCase().trim();
+    var list = companies.filter(function(c){
+      var matchesCat = activeCategory === "Todos" || vinculoGroup(c) === activeCategory;
+      var matchesQ = !q || (c.name+" "+c.sector+" "+c.vinculo).toLowerCase().indexOf(q) !== -1;
+      return matchesCat && matchesQ;
+    });
+    document.getElementById("dirCount").textContent = list.length + (list.length===1? " empresa encontrada" : " empresas encontradas") + " — perfiles verificados con fuentes públicas.";
+    var el = document.getElementById("companyGrid");
+    if(!list.length){ el.innerHTML = '<p style="color:var(--ink-faint);font-size:.88rem;padding:20px 0;">No encontramos empresas que coincidan con tu búsqueda.</p>'; return; }
+    el.innerHTML = list.map(function(c){
+      return '<button class="card card-pad company-card" data-goto="'+c.id+'">'+
+        '<div class="top">'+
+          '<div class="avatar-lg" style="width:44px;height:44px;border-radius:12px;border:0;font-size:.8rem;color:var(--ink);background:'+AVATAR_COLORS[c.color]+'">'+c.initials+'</div>'+
+          '<div style="min-width:0;">'+
+            '<div style="font-weight:800;font-size:.92rem;">'+esc(c.name)+'</div>'+
+            '<div class="cat">'+esc(c.vinculo)+'</div>'+
+            '<div class="loc">'+esc(c.sector)+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="certs">'+evidenceBadge(c.evidencia)+selfTag(c)+'</div>'+
+        '<div class="footline"><span style="font-size:.72rem;color:var(--ink-faint);">'+(c.fuente? 'Fuente pública citada' : 'Sin fuente pública')+'</span><span style="font-size:.72rem;color:var(--accent-strong);font-weight:700;">Ver ficha →</span></div>'+
+      '</button>';
+    }).join('');
+    el.querySelectorAll('[data-goto]').forEach(function(b){ b.addEventListener('click', function(){ openCompany(b.getAttribute('data-goto')); }); });
+  }
+
+  /* ---------- render: rfq ---------- */
+  function renderRfq(){
+    var el = document.getElementById("rfqList");
+    el.innerHTML = rfqs.map(function(r){
+      return '<article class="card card-pad rfq-card">'+
+        '<div class="top">'+
+          '<div><h3>'+esc(r.title)+'</h3><div class="buyer">'+esc(r.buyer)+' · '+esc(r.location)+'</div></div>'+
+          '<span class="match-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg>'+r.match+'% match</span>'+
+        '</div>'+
+        '<div class="rfq-meta">'+
+          '<div><span>Categoría</span><b style="font-family:var(--font-body);font-weight:700;">'+esc(r.category)+'</b></div>'+
+          '<div><span>Presupuesto</span><b>'+esc(r.budget)+'</b></div>'+
+          '<div><span>Entrega</span><b>'+esc(r.deadline)+'</b></div>'+
+          '<div><span>Cotizaciones</span><b>'+r.quotes+'</b></div>'+
+        '</div>'+
+        '<div class="rfq-foot"><span style="font-size:.76rem;color:var(--ink-faint);">Publicado por un comprador verificado</span><button class="btn btn-accent btn-sm">Cotizar ahora</button></div>'+
+      '</article>';
+    }).join('');
+  }
+
+  /* ---------- company detail ---------- */
+  var lastView = "mapa";
+  function openCompany(id){
+    var c = companyById[id];
+    if(!c) return;
+
+    var card = document.getElementById("detailCard");
+    var tabs = [
+      {key:"about", label:"Acerca de"},
+      {key:"fuente", label:"Fuente"}
+    ];
+
+    var panes = {
+      about: '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">'+
+          '<span class="tag">'+esc(c.vinculo)+'</span>'+
+          '<span class="tag">'+esc(c.sector)+'</span>'+
+          evidenceBadge(c.evidencia)+selfTag(c)+
+        '</div>'+
+        (c.descripcion ? '<p style="font-size:.95rem;line-height:1.6;color:var(--ink);max-width:70ch;">'+esc(c.descripcion)+'</p>' : ''),
+      fuente: c.fuente ? (
+        '<div class="card card-pad" style="box-shadow:none;max-width:60ch;">'+
+          '<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:800;margin-bottom:8px;">Fuente pública citada</div>'+
+          '<p style="font-size:.85rem;color:var(--ink-soft);word-break:break-all;margin-bottom:14px;">'+esc(c.fuente)+'</p>'+
+          fuenteLink(c.fuente, 'Abrir fuente')+
+        '</div>'
+      ) : (
+        '<div class="card card-pad" style="box-shadow:none;max-width:60ch;">'+
+          '<p style="font-size:.85rem;color:var(--ink-faint);">Esta empresa todavía no cargó una fuente pública que respalde el vínculo.</p>'+
+        '</div>'
+      )
+    };
+
+    card.innerHTML =
+      '<div class="detail-cover"></div>'+
+      '<div class="detail-head">'+
+        '<div class="avatar-xl" style="background:'+AVATAR_COLORS[c.color]+'">'+c.initials+'</div>'+
+        '<div class="detail-info"><h2>'+esc(c.name)+'</h2><p style="color:var(--ink-soft);font-size:.88rem;margin-top:2px;">'+esc(c.sector)+' · '+esc(c.vinculo)+'</p></div>'+
+        evidenceBadge(c.evidencia)+
+        (c.fuente ? '<a class="btn btn-accent btn-sm" href="'+esc(c.fuente)+'" target="_blank" rel="noopener noreferrer">Ver fuente</a>' : '')+
+      '</div>'+
+      '<div class="detail-tabs" id="detailTabs">'+tabs.map(function(t,i){ return '<button data-tab="'+t.key+'" aria-selected="'+(i===0)+'">'+t.label+'</button>'; }).join('')+'</div>'+
+      tabs.map(function(t,i){ return '<div class="detail-pane" data-pane="'+t.key+'" '+(i===0?'':'hidden')+'>'+panes[t.key]+'</div>'; }).join('');
+
+    card.querySelectorAll('[data-tab]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        card.querySelectorAll('[data-tab]').forEach(function(b){ b.setAttribute('aria-selected','false'); });
+        btn.setAttribute('aria-selected','true');
+        var key = btn.getAttribute('data-tab');
+        card.querySelectorAll('[data-pane]').forEach(function(p){ p.hidden = p.getAttribute('data-pane') !== key; });
+      });
+    });
+
+    switchView("detail");
+  }
+
+  /* ---------- suggestions ---------- */
+  function renderSuggestions(){
+    var el = document.getElementById("suggestList");
+    var suggestions = companies.slice(0,4);
+    el.innerHTML = suggestions.map(function(c){
+      return '<div class="suggest-item">'+
+        '<div class="avatar-sm" style="background:'+AVATAR_COLORS[c.color]+'">'+c.initials+'</div>'+
+        '<div class="info"><b>'+esc(c.name)+'</b><span>'+esc(c.sector)+'</span></div>'+
+        '<button class="btn btn-outline btn-sm" data-goto="'+c.id+'" style="padding:5px 12px;">Ver</button>'+
+      '</div>';
+    }).join('');
+    el.querySelectorAll('[data-goto]').forEach(function(b){ b.addEventListener('click', function(){ openCompany(b.getAttribute('data-goto')); }); });
+  }
+
+  /* ---------- view switching ---------- */
+  function switchView(name){
+    if(name !== "detail") lastView = name;
+    var isMapa = name === "mapa";
+    document.getElementById("introStrip").hidden = !isMapa;
+    document.querySelector("main.layout").hidden = isMapa;
+    ["feed","directorio","rfq","detail"].forEach(function(v){
+      document.getElementById("view-"+v).hidden = (isMapa || v !== name);
+    });
+    document.querySelectorAll('#topNav button').forEach(function(b){
+      b.setAttribute('aria-current', b.getAttribute('data-nav') === name ? "true" : "false");
+    });
+    if(isMapa){
+      if(window.__resizeNetCanvas) window.__resizeNetCanvas();
+      renderMap();
+    }
+    window.scrollTo({top:0, behavior:"auto"});
+  }
+
+  document.querySelectorAll('[data-nav]').forEach(function(el){
+    el.addEventListener('click', function(ev){
+      ev.preventDefault();
+      closeMobileNav();
+      switchView(el.getAttribute('data-nav'));
+    });
+  });
+
+  document.getElementById("backBtn").addEventListener('click', function(){ switchView(lastView); });
+
+  document.getElementById("globalSearch").addEventListener('input', function(){
+    switchView("directorio");
+    renderDirectory();
+  });
+
+  document.getElementById("toggleRfqForm").addEventListener('click', function(){
+    var f = document.getElementById("rfqForm");
+    f.hidden = !f.hidden;
+  });
+
+  document.getElementById("submitRfq").addEventListener('click', function(){
+    var titulo = document.getElementById("fTitulo").value.trim();
+    var categoria = document.getElementById("fCategoria").value.trim();
+    var ubicacion = document.getElementById("fUbicacion").value.trim();
+    var entrega = document.getElementById("fEntrega").value.trim();
+    var presupuesto = document.getElementById("fPresupuesto").value.trim();
+    if(!titulo || !categoria){ document.getElementById("fTitulo").focus(); return; }
+    rfqs.unshift({ id: Date.now(), title:titulo, buyer:(currentUser && currentUser.name) || "Empresa de la red", category:categoria||"General",
+      location:ubicacion||"—", budget:presupuesto||"A definir", deadline:entrega||"A definir", quotes:0, match:100 });
+    renderRfq();
+    ["fTitulo","fCategoria","fUbicacion","fEntrega","fPresupuesto"].forEach(function(id){ document.getElementById(id).value=""; });
+    document.getElementById("rfqForm").hidden = true;
+  });
+
+  document.getElementById("publishPost").addEventListener('click', function(){
+    var t = document.getElementById("composerText").value.trim();
+    if(!t) return;
+    userPosts.unshift({ __user:true, id: Date.now(), name:(currentUser && currentUser.name) || "Vos", initials:(currentUser && currentUser.initials) || "YO", sector:"Publicación propia", time:"ahora", text:t });
+    renderFeed();
+    document.getElementById("composerText").value = "";
+  });
+
+  /* ---------- network canvas ---------- */
+  (function initCanvas(){
+    var canvas = document.getElementById("netCanvas");
+    var ctx = canvas.getContext("2d");
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var pts = [], W=0, H=0;
+
+    window.__resizeNetCanvas = function(){ resize(); };
+
+    function resize(){
+      var strip = document.getElementById("introStrip");
+      W = canvas.width = strip.clientWidth * devicePixelRatio;
+      H = canvas.height = strip.clientHeight * devicePixelRatio;
+      canvas.style.width = strip.clientWidth+"px";
+      canvas.style.height = strip.clientHeight+"px";
+      var n = Math.min(46, Math.floor((strip.clientWidth*strip.clientHeight)/16000));
+      pts = [];
+      for(var i=0;i<n;i++){
+        pts.push({ x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.25*devicePixelRatio, vy:(Math.random()-.5)*.25*devicePixelRatio });
+      }
+    }
+
+    function frame(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=0;i<pts.length;i++){
+        var p = pts[i];
+        if(!reduced){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1; }
+        for(var j=i+1;j<pts.length;j++){
+          var q = pts[j];
+          var dx=p.x-q.x, dy=p.y-q.y, d=Math.sqrt(dx*dx+dy*dy);
+          var maxD = 130*devicePixelRatio;
+          if(d<maxD){
+            ctx.strokeStyle = "rgba(100,145,255,"+(1-d/maxD)*0.35+")";
+            ctx.lineWidth = 1*devicePixelRatio;
+            ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
+          }
+        }
+      }
+      for(var k=0;k<pts.length;k++){
+        ctx.fillStyle = "rgba(201,255,77,0.9)";
+        ctx.beginPath(); ctx.arc(pts[k].x, pts[k].y, 1.6*devicePixelRatio, 0, Math.PI*2); ctx.fill();
+      }
+      if(!reduced) requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    frame();
+  })();
+
+  bootApp();
+})();
+</script>
