@@ -1,5 +1,5 @@
-import { auth, db } from "./firebase-init.js";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged }
+import { auth, db } from "./firebase-init.js"; 
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, setDoc, getDoc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -309,6 +309,28 @@ import { doc, setDoc, getDoc, serverTimestamp }
       closeAuthDropdown();
     })
     .catch(function(err){ alert("No pudimos iniciar sesión: " + err.message); });
+});
+
+document.getElementById("forgotPasswordBtn").addEventListener("click", function(){
+  var email = document.getElementById("loginEmail").value.trim();
+  var msgEl = document.getElementById("loginMsg");
+  if(!email){
+    msgEl.style.color = "#B0273C";
+    msgEl.textContent = "Escribí primero tu email arriba, y después tocá este botón.";
+    msgEl.hidden = false;
+    return;
+  }
+  sendPasswordResetEmail(auth, email)
+    .then(function(){
+      msgEl.style.color = "var(--success)";
+      msgEl.textContent = "Te enviamos un email a " + email + " con instrucciones para restablecer tu contraseña.";
+      msgEl.hidden = false;
+    })
+    .catch(function(err){
+      msgEl.style.color = "#B0273C";
+      msgEl.textContent = "No pudimos enviar el email: " + err.message;
+      msgEl.hidden = false;
+    });
 });
 
   document.getElementById("registerForm").addEventListener("submit", function(ev){
