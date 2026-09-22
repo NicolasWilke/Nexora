@@ -98,6 +98,14 @@
     catch(e){ return null; }
   }
   function contactFor(c){
+    if(c.contactoNombre || c.contactoEmail || c.contactoTelefono){
+      return {
+        nombre: c.contactoNombre || null,
+        email: c.contactoEmail || null,
+        telefono: c.contactoTelefono || null,
+        verified: true
+      };
+    }
     var domain = domainFor(c);
     if(!domain) return null;
     return { email: "contacto@"+domain, domain: domain };
@@ -289,6 +297,9 @@
   document.getElementById("registerForm").addEventListener("submit", function(ev){
     ev.preventDefault();
     var empresa = document.getElementById("regEmpresa").value.trim();
+    var contactoNombre = document.getElementById("regContactoNombre").value.trim();
+    var email = document.getElementById("regEmail").value.trim();
+    var telefono = document.getElementById("regTelefono").value.trim();
     var vinculo = document.getElementById("regVinculo").value;
     var sector = document.getElementById("regSector").value.trim();
     var fuente = document.getElementById("regFuente").value.trim();
@@ -296,8 +307,8 @@
     var accountTypeBtn = document.querySelector("#regAudienceTabs [data-reg-tab][aria-selected='true']");
     var accountType = accountTypeBtn ? accountTypeBtn.getAttribute("data-reg-tab") : "empresa";
 
-    if(!empresa || !vinculo || !sector){
-      errEl.textContent = "Completá empresa, categoría y sector para crear el perfil.";
+    if(!empresa || !contactoNombre || !email || !telefono || !vinculo || !sector){
+      errEl.textContent = "Completá empresa, nombre de contacto, email, teléfono, categoría y sector para crear el perfil.";
       errEl.hidden = false;
       return;
     }
@@ -307,7 +318,8 @@
       id: slugify(empresa), name: empresa, vinculo: vinculo, sector: sector,
       descripcion: "", evidencia: fuente ? "Media-Alta" : "Media",
       periodo: "", fuente: fuente, initials: initialsOf(empresa),
-      color: companies.length % 3, selfRegistered: true, accountType: accountType, plan: "gratis"
+      color: companies.length % 3, selfRegistered: true, accountType: accountType, plan: "gratis",
+      contactoNombre: contactoNombre, contactoEmail: email, contactoTelefono: telefono
     };
     companies.unshift(record);
     companyById[record.id] = record;
@@ -486,6 +498,19 @@
       if(!info){
         return '<div class="card card-pad" style="box-shadow:none;max-width:60ch;">'+
           '<p style="font-size:.85rem;color:var(--ink-faint);">Esta ficha todavía no tiene un dominio público del que inferir un contacto.</p>'+
+        '</div>';
+      }
+      if(info.verified){
+        return '<div class="card card-pad" style="box-shadow:none;max-width:60ch;">'+
+          '<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:800;margin-bottom:8px;">Contacto</div>'+
+          (info.nombre ? '<p style="font-size:.9rem;color:var(--ink);margin-bottom:6px;"><b>Nombre:</b> '+esc(info.nombre)+'</p>' : '')+
+          (info.email ? '<p style="font-size:.9rem;color:var(--ink);margin-bottom:6px;"><b>Email:</b> '+esc(info.email)+'</p>' : '')+
+          (info.telefono ? '<p style="font-size:.9rem;color:var(--ink);margin-bottom:6px;"><b>Teléfono:</b> '+esc(info.telefono)+'</p>' : '')+
+          '<p style="font-size:.76rem;color:var(--ink-faint);margin-bottom:14px;">Dato cargado por la empresa al registrarse en TradeX.</p>'+
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+            (info.email ? '<a class="btn btn-outline btn-sm" href="mailto:'+esc(info.email)+'">Escribir por email</a>' : '')+
+            (info.telefono ? '<a class="btn btn-outline btn-sm" href="tel:'+esc(info.telefono.replace(/[^+\d]/g,''))+'">Llamar</a>' : '')+
+          '</div>'+
         '</div>';
       }
       return '<div class="card card-pad" style="box-shadow:none;max-width:60ch;">'+
