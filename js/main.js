@@ -1,3 +1,8 @@
+import { auth, db } from "./firebase-init.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { doc, setDoc, getDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 (function(){
   "use strict";
 
@@ -286,54 +291,79 @@
   });
 
   document.getElementById("loginForm").addEventListener("submit", function(ev){
-    ev.preventDefault();
-    currentUser = companyById["pampa-energia"];
-    if(!currentUser.plan) currentUser.plan = "gratis";
-    refreshAuthUI();
-    renderPlanButtons();
-    closeAuthDropdown();
-  });
+  ev.preventDefault();
+  var email = document.getElementById("loginEmail").value.trim();
+  var password = document.getElementById("loginPassword").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(function(cred){ return getDoc(doc(db, "empresas", cred.user.uid)); })
+    .then(function(snap){
+      if(!snap.exists()){ alert("No encontramos el perfil de esta cuenta."); return; }
+      var record = Object.assign({ id: snap.id }, snap.data());
+      companyById[record.id] = record;
+      if(!companies.some(function(c){ return c.id === record.id; })) companies.unshift(record);
+      currentUser = record;
+      if(!currentUser.plan) currentUser.plan = "gratis";
+      refreshAuthUI();
+      renderPlanButtons();
+      closeAuthDropdown();
+    })
+    .catch(function(err){ alert("No pudimos iniciar sesión: " + err.message); });
+});
 
   document.getElementById("registerForm").addEventListener("submit", function(ev){
-    ev.preventDefault();
-    var empresa = document.getElementById("regEmpresa").value.trim();
-    var contactoNombre = document.getElementById("regContactoNombre").value.trim();
-    var email = document.getElementById("regEmail").value.trim();
-    var telefono = document.getElementById("regTelefono").value.trim();
-    var vinculo = document.getElementById("regVinculo").value;
-    var sector = document.getElementById("regSector").value.trim();
-    var fuente = document.getElementById("regFuente").value.trim();
-    var errEl = document.getElementById("regError");
-    var accountTypeBtn = document.querySelector("#regAudienceTabs [data-reg-tab][aria-selected='true']");
-    var accountType = accountTypeBtn ? accountTypeBtn.getAttribute("data-reg-tab") : "empresa";
+  ev.preventDefault();
+  var empresa = document.getElementById("regEmpresa").value.trim();
+  var contactoNombre = document.getElementById("regContactoNombre").value.trim();
+  var email = document.getElementById("regEmail").value.trim();
+  var telefono = document.getElementById("regTelefono").value.trim();
+  var vinculo = document.getElementById("regVinculo").value;
+  var sector = document.getElementById("regSector").value.trim();
+  var fuente = document.getElementById("regFuente").value.trim();
+  var password = document.getElementById("regPassword").value;
+  var errEl = document.getElementById("regError");
+  var accountTypeBtn = document.querySelector("#regAudienceTabs [data-reg-tab][aria-selected='true']");
+  var accountType = accountTypeBtn ? accountTypeBtn.getAttribute("data-reg-tab") : "empresa";
 
-    if(!empresa || !contactoNombre || !email || !telefono || !vinculo || !sector){
-      errEl.textContent = "Completá empresa, nombre de contacto, email, teléfono, categoría y sector para crear el perfil.";
+  if(!empresa || !contactoNombre || !email || !telefono || !vinculo || !sector || !password){
+    errEl.textContent = "Completá empresa, nombre de contacto, email, teléfono, categoría, sector y contraseña para crear el perfil.";
+    errEl.hidden = false;
+    return;
+  }
+  errEl.hidden = true;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(function(cred){
+      var record = {
+        id: cred.user.uid, name: empresa, vinculo: vinculo, sector: sector,
+        descripcion: "", evidencia: fuente ? "Media-Alta" : "Media",
+        periodo: "", fuente: fuente, initials: initialsOf(empresa),
+        color: companies.length % 3, selfRegistered: true, accountType: accountType, plan: "gratis",
+        contactoNombre: contactoNombre, contactoEmail: email, contactoTelefono: telefono
+      };
+      return setDoc(doc(db, "empresas", cred.user.uid), Object.assign({}, record, { createdAt: serverTimestamp() }))
+        .then(function(){ return record; });
+    })
+    .then(function(record){
+      companies.unshift(record);
+      companyById[record.id] = record;
+      currentUser = record;
+      renderCategoryFilters();
+      renderDirectory();
+      renderSuggestions();
+      refreshAuthUI();
+      renderPlanButtons();
+      closeAuthDropdown();
+      document.getElementById("registerForm").reset();
+      switchRegTab("empresa");
+      openCompany(record.id);
+    })
+    .catch(function(err){
+      errEl.textContent = "No pudimos crear la cuenta: " + err.message;
       errEl.hidden = false;
-      return;
-    }
-    errEl.hidden = true;
-
-    var record = {
-      id: slugify(empresa), name: empresa, vinculo: vinculo, sector: sector,
-      descripcion: "", evidencia: fuente ? "Media-Alta" : "Media",
-      periodo: "", fuente: fuente, initials: initialsOf(empresa),
-      color: companies.length % 3, selfRegistered: true, accountType: accountType, plan: "gratis",
-      contactoNombre: contactoNombre, contactoEmail: email, contactoTelefono: telefono
-    };
-    companies.unshift(record);
-    companyById[record.id] = record;
-    currentUser = record;
-    renderCategoryFilters();
-    renderDirectory();
-    renderSuggestions();
-    refreshAuthUI();
-    renderPlanButtons();
-    closeAuthDropdown();
-    this.reset();
-    switchRegTab("empresa");
-    openCompany(record.id);
-  });
+    });
+});
+    
 
   /* ---------- plan selection (simulated — no real payments) ---------- */
   function renderPlanButtons(){
@@ -676,4 +706,20 @@
   });
 
   bootApp();
+  onAuthStateChanged(auth, function(user){
+    if(!user){ return; }
+    getDoc(doc(db, "empresas", user.uid)).then(function(snap){
+      if(!snap.exists()) return;
+      var record = Object.assign({ id: snap.id }, snap.data());
+      companyById[record.id] = record;
+      if(!companies.some(function(c){ return c.id === record.id; })) companies.unshift(record);
+      currentUser = record;
+      if(!currentUser.plan) currentUser.plan = "gratis";
+      refreshAuthUI();
+      renderPlanButtons();
+      renderCategoryFilters();
+      renderDirectory();
+      renderSuggestions();
+    });
+  });
 })();
